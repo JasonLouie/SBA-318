@@ -1,14 +1,15 @@
-import { generateRandomId } from "../functions/functions";
-import { timeOptions } from "../constants/time";
+import { generateRandomId } from "../functions/functions.js";
+import { timeOptions } from "../constants/time.js";
 
 export default class Message {
-    #id = generateRandomId();
+    #id;
     #senderId;
     #chatId;
     #message;
     #timestamp = new Date();
 
-    constructor(senderId, chatId, message) {
+    constructor(senderId, chatId, message, id=generateRandomId()) {
+        this.#id = id;
         this.#senderId = senderId;
         this.#chatId = chatId;
         this.#message = message;

@@ -1,8 +1,8 @@
 import express from "express";
-import users from "../data/users.js";
-import chats from "../data/chats.js";
+import { users, chats, messages } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
+import { chatExists, findChatMessages, findUserChat, findUserChatMessages, findUserChats, userExists } from "../functions/functions.js";
 
 const router = express.Router();
 
@@ -69,9 +69,82 @@ router.route("/:id")
         }
     });
 
+// Get all chats that the user is in
 router.get("/:id/chats", (req, res, next) => {
-    const userChats = chats.filter(chat => chat.hasUser(req.params.id));
-    res.json(userChats);
-})
+    if (!userExists(req.params.id)) {
+        next(new EndpointError(404, "User does not exist"));
+    } else {
+        const userChats = findUserChats(req.params.id);
+        res.json(userChats);
+    }
+});
+
+// Get the particular chat that the user is in
+router.get("/:id/chats/:chatId", (req, res, next) => {
+    if (!userExists(req.params.id)) {
+        next(new EndpointError(404, "User does not exist"));
+    } else if (!chatExists(req.params.chatId)) {
+        next(new EndpointError(404, "Chat does not exist"));
+    } else {
+        const userChat = findUserChat(req.params.id, req.params.chatId);
+        if (userChat) {
+            res.json(userChat);
+        } else {
+            next(new EndpointError(403, "User is not part of the chat group"));
+        }
+    }
+});
+
+// Get the particular chat that the user is in
+router.get("/:id/chats/:chatId/messages", (req, res, next) => {
+    if (!userExists(req.params.id)) {
+        next(new EndpointError(404, "User does not exist"));
+    } else if (!chatExists(req.params.chatId)) {
+        next(new EndpointError(404, "Chat does not exist"));
+    } else if (findUserChat(req.params.id, req.params.chatId)) {
+        let chatMessages = findChatMessages(req.params.chatId);
+        if (Object.keys(req.query).length > 0){
+            verifyQueries();
+            const userId = req.query["userId"];
+            if (userId) {
+                if (!userExists(userId)) {
+                    next(new EndpointError(404, "User does not exist"));
+                    return;
+                } else if (findUserChat(userId, req.params.chatId)) {
+                    chatMessages = chatMessages.filter(m => m.senderId == userId);
+                } else {
+                    next(new EndpointError(403, "User is not part of the chat group"));
+                    return;
+                }
+            }
+            if (req.query["limit"]) {
+                chatMessages = chatMessages.slice(Number(req.query["limit"]) * -1);
+            }
+        }
+        res.json(chatMessages);
+        
+    } else {
+        next(new EndpointError(403, "User is not part of the chat group"));
+    }
+
+    function verifyQueries() {
+        const allowedQueries = ["userId", "limit"];
+        for (const key in req.query) {
+            if (!allowedQueries.includes(key)) {
+                next(error(new EndpointError(403, "Cannot access this")));
+            }
+        }
+    }
+});
+
+// Get all messages that the user sent
+router.get("/:id/messages", (req, res, next) => {
+    if (!userExists(req.params.id)) {
+        next(new EndpointError(404, "User does not exist"));
+    } else {
+        const userMessages = messages.filter(m => m.senderId == req.params.id);
+        res.json(userMessages);
+    }
+});
 
 export default router;

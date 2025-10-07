@@ -1,5 +1,7 @@
 import express from "express";
 import userRouter from "./routes/users.js";
+import chatRouter from "./routes/chats.js";
+import messageRouter from "./routes/messages.js";
 import EndpointError from "./classes/EndpointError.js";
 import { timeOptions } from "./constants/time.js";
 
@@ -10,8 +12,9 @@ app.set("view engine", "ejs");
 
 app.use(express.static("public"));
 
+// Middleware that logs what request was made (method, url) and the time it was made.
 app.use((req, res, next) => {
-    console.log(`${req.method} Request made to url ${req.url} at ${new Date().toLocaleTimeString("en-US", timeOptions)}`);
+    console.log(`Request made: ${req.method} ${req.url} at ${new Date().toLocaleTimeString("en-US", timeOptions)}`);
     next();
 });
 
@@ -20,6 +23,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", userRouter);
+app.use("/chats", chatRouter);
+app.use("/messages", messageRouter);
 
 // Invalid route handler
 app.use((req, res, next) => {

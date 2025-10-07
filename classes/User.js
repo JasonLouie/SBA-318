@@ -1,12 +1,13 @@
 import { generateRandomId } from "../functions/functions.js";
 
 export default class User {
-    #id = generateRandomId();
+    #id;
     #username;
     email;
     password;
 
-    constructor(username, email = null, password = null) {
+    constructor(username, email = null, password = null, id=generateRandomId()) {
+        this.#id = id;
         this.#username = username;
         this.email = email;
         this.password = password;
@@ -27,5 +28,9 @@ export default class User {
             email: this.email,
             password: this.password
         };
+    }
+
+    toString() {
+        return this.#username;
     }
 }
