@@ -8,13 +8,12 @@ router.get("/", (req, res) => {
     res.json(chats);
 });
 
-router.get("/:id", (req, res, next) => {
-    const chat = chats.filter(c => c.id == req.params.id);
-    if (chat) {
-        res.json(chat);
-    } else {
-        next(new EndpointError(404, "Chat does not exist"));
+router.get("/:id", (req, res) => {
+    const chat = chats.find(c => c.id == req.params.id);
+    if (!chat) {
+        throw new EndpointError(404, "Chat does not exist");
     }
+    res.json(chat);
 });
 
 export default router;

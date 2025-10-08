@@ -5,38 +5,35 @@ import { verifyKeys } from "../functions/functions.js";
 
 const router = express.Router();
 
-router.get("/", (req, res, next) => {
-    if (Object.keys(req.query).length > 0) {
-        if (!verifyKeys(req.query, ["userId", "messageId", "chatId", "limit"])) {
-            next(new EndpointError(403, "Query must be 'userId', 'messageId', 'chatId', or 'limit'."));
-            return;
-        }
+// NEED TO perform tests FOR STRICT messageId or the other 3
+// Gets all messages, a filtered array of messages, or a particular message
+// Queries allowed: At least one of the 3 (userId, chatId, limit) or strictly messageId
+router.get("/", (req, res) => {
+    if (Object.keys(req.query).length === 1 && verifyKeys(req.query, ["messageId"])) {
         const messageId = req.query["messageId"];
         if (messageId) {
             const message = messages.find(m => m.id == messageId);
             if (message) {
                 res.json(message);
             } else {
-                next(new EndpointError(404, "Message does not exist"));
+                throw new EndpointError(404, "Message does not exist");
             }
-            return;
         }
+    } else if (Object.keys(req.query).length < 4 && verifyKeys(req.query, ["userId", "chatId", "limit"])) {
         const userId = req.query["userId"];
         const chatId = req.query["chatId"];
         const limit = req.query["limit"];
         let queriedMessages = messages;
         if (userId) {
             if (!userExists(userId)) {
-                next(new EndpointError(404, "User does not exist"));
-                return;
+                throw new EndpointError(404, "User does not exist");
             } else {
                 queriedMessages = queriedMessages.filter(m => m.senderId == userId);
             }
         }
         if (chatId) {
             if (!chatExists(chatId)) {
-                next(new EndpointError(404, "Chat does not exist"));
-                return;
+                throw new EndpointError(404, "Chat does not exist");
             } else {
                 queriedMessages = queriedMessages.filter(m => m.chatId == chatId);
             }
@@ -44,21 +41,22 @@ router.get("/", (req, res, next) => {
         if (limit) {
             queriedMessages = queriedMessages.slice(Number(limit) * -1);
         }
+    } else if (req.query) {
+        throw new EndpointError(403, "Query must contain 'userId', 'chatId', and/or 'limit', or only 'messageId'.");
     } else {
         res.json(messages);
     }
 });
 
 router.route("/:id")
-    .get((req, res, next) => {
+    .get((req, res) => {
         const message = messages.find(m => m.id == req.params.id);
-        if (message) {
-            res.json(message);
-        } else {
-            next(new EndpointError(404, "Message does not exist"));
+        if (!message) {
+            throw new EndpointError(404, "Message does not exist");
         }
+        res.json(message);
     })
-    .patch((req, res, next) => { // Only allow modifying the message
+    .patch((req, res) => { // Only allow modifying the message
         if (req.body && Object.keys(req.body).length === 1 && req.body["message"]) {
             const message = messages.find((m, i) => {
                 if (m.id == req.params.id) {
@@ -66,28 +64,27 @@ router.route("/:id")
                     return true;
                 }
             });
-            if (message) {
-                res.json(message);
-            } else {
-                next(new EndpointError(404, "Message does not exist"));
+            if (!message) {
+                throw new EndpointError(404, "Message does not exist");
             }
+            res.json(message);
+        } else if (!req.body) {
+            throw new EndpointError(400, "Must contain a body with 'message'!");
         } else {
-            next(new EndpointError(403, "Cannot modify anything other than the contents of the message"));
-            return;
+            throw new EndpointError(403, "Cannot modify anything other than the contents of the message");
         }
     })
-    .delete((req, res, next) => {
+    .delete((req, res) => {
         const message = messages.find((m, i) => {
             if (m.id == req.params.id) {
                 messages.splice(i, 1);
                 return true;
             }
         });
-        if (message) {
-            res.json(message);
-        } else {
-            next(new EndpointError(404, "Message does not exist"));
+        if (!message) {
+            throw new EndpointError(404, "Message does not exist");
         }
+        res.json(message);
     });
 
 export default router;
