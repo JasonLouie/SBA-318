@@ -6,14 +6,14 @@ export default class Chat {
     #name;
     #id;
     #users = []; // List of User instances within the chat
-    #pic; // Relative path to picture
+    #image_url; // Relative path to image_urlture
     #timestamp = new Date();
 
-    constructor(pic = null, users = [], id=generateRandomId()) {
-        this.#pic = pic;
-        users.forEach(u => this.#users.push(u.id));
-        this.#name = users.join(", ");
+    constructor(image_url = "../images/profile-dark.png", users = [], id = generateRandomId(), name) {
+        this.#image_url = image_url;
         this.#id = id;
+        users.forEach(u => this.#users.push(u.id));
+        this.#name = name || users.join(", ");
     }
 
     get id() {
@@ -43,8 +43,9 @@ export default class Chat {
 
     toJSON() {
         return {
+            id: this.#id,
             name: this.#name,
-            pic: this.#pic,
+            image_url: this.#image_url,
             preview: this.preview,
             users: this.users
         };

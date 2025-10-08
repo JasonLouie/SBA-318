@@ -1,6 +1,11 @@
 body {
     margin: 0;
     padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 .dark-mode {
@@ -8,14 +13,45 @@ body {
     color: white;
 }
 
-.container {
+nav {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 54px;
+    background-color: #333;
+}
+
+nav > h1 {
+    margin-left: 10px;
+}
+
+.nav-element {
+    margin: 0 14px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.flex-wrap {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+}
+
+.container {
+    padding-top: 54px;
+}
+
+section {
+    margin-top: 20px;
+    width: 80%;
 }
 
 .form-container {
-    background-color: #222;
-    height: 400px;
+    display: block;
+    border-radius: 8px;
+    background-color: #444444;
+    height: 370px;
     width: 350px;
 }
 
@@ -24,12 +60,15 @@ form > input, #signup-btn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 220px;
+    width: 230px;
     padding: 4px 8px;
     border-radius: 8px;
 }
 
 form > h1 {
+    top: 30px;
+    position: absolute;
+    margin: 0;
     text-align: center;
     width: 100%;
 }
@@ -41,21 +80,60 @@ form > h1 {
 }
 
 #signup-form > [name="username"] {
-    top: 50px;
+    bottom: 220px;
 }
 
 #signup-form > [name="email"] {
-    top: 90px;
+    bottom: 180px;
 }
 
 #signup-form > [name="password"] {
-    top: 130px;
+    bottom: 140px;
 }
 
 #signup-form > [name="confirmPassword"] {
-    top: 170px;
+    bottom: 100px;
 }
 
 #signup-btn {
-    bottom: 50px;
+    height: 30px;
+    bottom: 30px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: left;
+}
+
+th > h3 {
+    margin: 0;
+}
+
+#users th:first-child, tr:first-child {
+    width: 85px;
+}
+
+#users th:nth-child(2), td:nth-child(2) {
+    width: 360px;
+}
+
+#users td {
+    margin: auto;
+}
+
+#users td:nth-child(2) {
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: 14px;
+}
+
+#users tr {
+    border-bottom: 1px solid #ddd;
+}
+
+#users tr > td {
+    padding: 8px 0;
 }

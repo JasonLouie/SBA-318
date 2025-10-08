@@ -97,13 +97,35 @@ export function findUserChatMessages(userId, chatId) {
 
 /**
  * Returns all messages for a particular chat
- * @param {number} chatId - Id of the chat
+ * @param {number | string} chatId - Id of the chat
  * @returns {Message[]}
  */
 export function findChatMessages(chatId) {
     return messages.filter(m => m.chatId == chatId);
 }
 
+/**
+ * Returns a particular message from a particular chat
+ * @param {number | string} chatId 
+ * @param {number | string} messageId 
+ * @returns {Message}
+ */
+export function findChatMessage(chatId, messageId) {
+    if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    } else if (!messageExists(messageId)) {
+        throw new EndpointError(404, "Message does not exist");
+    }
+    return messages.find(m => m.chatId == chatId && m.id == messageId);
+}
+
+/**
+ * Returns a particular message from a particular chat if the user sent it
+ * @param {number | string} userId
+ * @param {number | string} chatId 
+ * @param {number | string} messageId 
+ * @returns {Message}
+ */
 export function findUserChatMessage(userId, chatId, messageId) {
     if (!userExists(userId)){
         throw new EndpointError(404, "User does not exist");

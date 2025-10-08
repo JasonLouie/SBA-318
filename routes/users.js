@@ -2,7 +2,7 @@ import express from "express";
 import { messages, users } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
-import { findChatMessages, findUserChat, findUserChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys } from "../functions/functions.js";
+import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys } from "../functions/functions.js";
 
 const router = express.Router();
 
@@ -54,18 +54,24 @@ router.route("/:id")
         res.json(user);
     })
     .patch((req, res) => { // Change email or password
-        const user = users.find((u, i) => {
-            if (u.id == req.params.id) {
-                for (const key in req.body) {
-                    users[i][key] = req.body[key];
+        if (req.body && verifyKeys(req.body, ["email", "password"])) {
+            const user = users.find((u, i) => {
+                if (u.id == req.params.id) {
+                    for (const key in req.body) {
+                        users[i][key] = req.body[key];
+                    }
+                    return true;
                 }
-                return true;
+            });
+            if (!user) {
+                throw new EndpointError(404, "User does not exist");
             }
-        });
-        if (!user) {
-            throw new EndpointError(404, "User does not exist");
+            res.json(user);
+        } else if (!req.body) {
+            throw new EndpointError(400, "Must contain a body with 'email' or 'password'!");
+        } else {
+            throw new EndpointError(403, "Cannot modify anything other than the email or password");
         }
-        res.json(user);
     })
     .delete((req, res) => { // Delete user
         const user = users.find((u, i) => {
@@ -96,7 +102,6 @@ router.get("/:id/chats/:chatId", (req, res) => {
 });
 
 // Get the messages of a chat that the user is in
-// SHOULD modify to just get that user's messages for now and use another path for all
 router.get("/:id/chats/:chatId/messages", (req, res) => {
     if (findUserChat(req.params.id, req.params.chatId)) {
         let chatMessages = findChatMessages(req.params.chatId);
@@ -125,11 +130,11 @@ router.get("/:id/chats/:chatId/messages", (req, res) => {
     }
 });
 
-// Route for particular message, from a particular chat, and belonging to the user that sent it
+// Route for a particular message, from a particular chat, and belonging to the user that sent it
 router.route("/:id/chats/:chatId/messages/:messageId")
     .get((req, res) => {
         if (findUserChat(req.params.id, req.params.chatId)) {
-            const message = findUserChatMessage(req.params.id, req.params.chatId, req.params.messageId);
+            const message = findChatMessage(req.params.chatId, req.params.messageId);
             if (!message) {
                 throw new EndpointError(404, "Message does not exist");
             }
@@ -154,7 +159,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
             } else {
                 throw new EndpointError(404, "User is not part of the chat group");
             }
-        } else if(!req.body) {
+        } else if (!req.body) {
             throw new EndpointError(400, "Must contain a body with 'message'!");
         } else {
             throw new EndpointError(403, "Cannot modify anything other than the contents of the message");

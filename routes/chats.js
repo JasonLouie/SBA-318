@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-    const chat = chats.find(c => c.id == req.params.id);
+    const chat = chats.filter(c => c.id == req.params.id);
     if (!chat) {
         throw new EndpointError(404, "Chat does not exist");
     }

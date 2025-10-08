@@ -3,7 +3,7 @@ import Chat from "../classes/Chat.js";
 import Message from "../classes/Message.js";
 
 // Init user data
-const user1 = new User("Bob", "bobby@gmail.com", "Securepass123", 1);
+const user1 = new User("Bobert", "bobby@gmail.com", "Securepass123", 1);
 const user2 = new User("SomeUser", "someEmail@gmail.com", "Securepass123", 2);
 const user3 = new User("AnotherUser", "anotherEmail@domain.com", "Securepass123", 3);
 const user4 = new User("testUser", "testEmail@test.com", "Securepass123", 4);
