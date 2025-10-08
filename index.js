@@ -18,6 +18,8 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(express.json());
+
 app.get("/", (req, res) => {
     res.render("index");
 });

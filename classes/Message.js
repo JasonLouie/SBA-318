@@ -5,14 +5,14 @@ export default class Message {
     #id;
     #senderId;
     #chatId;
-    #message;
+    message;
     #timestamp = new Date();
 
     constructor(senderId, chatId, message, id=generateRandomId()) {
         this.#id = id;
         this.#senderId = senderId;
         this.#chatId = chatId;
-        this.#message = message;
+        this.message = message;
     }
 
     get id() {
@@ -25,10 +25,6 @@ export default class Message {
 
     get chatId() {
         return this.#chatId;
-    }
-
-    get message() {
-        return this.#message;
     }
 
     get dateSent() {
@@ -44,7 +40,7 @@ export default class Message {
             id: this.#id,
             senderId: this.#senderId,
             chatId: this.#chatId,
-            message: this.#message,
+            message: this.message,
             dateSent: this.dateSent,
             timeSent: this.timeSent
         };

@@ -2,6 +2,7 @@ import {users, chats, messages} from "../data/data.js";
 import User from "../classes/User.js";
 import Chat from "../classes/Chat.js";
 import Message from "../classes/Message.js";
+import EndpointError from "../classes/EndpointError.js";
 
 /**
  * Generates a random id with Date.now() and a random suffix between the lower bound and upper bound inclusively
@@ -46,16 +47,24 @@ export function messageExists(messageId) {
  * @returns {Chat[]} Array of Chat instances that the user is in
  */
 export function findUserChats(userId) {
+    if (!userExists(userId)) {
+        throw new EndpointError(404, "User does not exist");
+    }
     return chats.filter(c => c.hasUser(userId));
 }
 
 /**
- * Returns the particular chat that the user is in
+ * Returns the particular chat that the user is in. Also used to verify if a user is in the chat
  * @param {number} userId - Id of the user
  * @param {number} chatId - Id of the chat
  * @returns {Chat | undefined} Chat instance that the user is part of or undefined if that chat doesn't exist or doesn't contain the user
  */
 export function findUserChat(userId, chatId) {
+    if (!userExists(userId)){
+        throw new EndpointError(404, "User does not exist");
+    } else if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    }
     return chats.find(c => c.hasUser(userId) && c.id == chatId);
 }
 
@@ -65,6 +74,9 @@ export function findUserChat(userId, chatId) {
  * @returns {Message[]} Array of Message instances that the user sent
  */
 export function findUserMessages(userId) {
+    if (!userExists(userId)){
+        throw new EndpointError(404, "User does not exist");
+    }
     return messages.filter(m => m.senderId == userId);
 }
 
@@ -75,6 +87,11 @@ export function findUserMessages(userId) {
  * @returns {Message[]} Array of Message instances that the user sent to a chat
  */ 
 export function findUserChatMessages(userId, chatId) {
+    if (!userExists(userId)){
+        throw new EndpointError(404, "User does not exist");
+    } else if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    }
     return messages.filter(m => m.senderId == userId && m.chatId == chatId);
 }
 
@@ -85,4 +102,24 @@ export function findUserChatMessages(userId, chatId) {
  */
 export function findChatMessages(chatId) {
     return messages.filter(m => m.chatId == chatId);
+}
+
+export function findUserChatMessage(userId, chatId, messageId) {
+    if (!userExists(userId)){
+        throw new EndpointError(404, "User does not exist");
+    } else if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    } else if (!messageExists(messageId)) {
+        throw new EndpointError(404, "Message does not exist");
+    }
+    return messages.find(m => m.userId == userId && m.chatId == chatId && m.id == messageId);
+}
+
+export function verifyKeys(obj, allowedKeys) {
+    for (const key in obj) {
+        if (!allowedKeys.includes(key)) {                
+            return false;
+        }
+    }
+    return true;
 }
