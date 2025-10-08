@@ -10,9 +10,16 @@
     <header>
 
     </header>
-    <main>
-        <div class="container">
-            <h1>Hello World!</h1>
+    <main class="container">
+        <div class="form-container">
+            <form action="/users" method="post" id="signup-form">
+                <h1>Sign Up</h1>
+                <input type="text" name="username" id="username" placeholder="Enter a username" required autocomplete="none">
+                <input type="email" name="email" id="email" placeholder="Enter an email" required autocomplete="none">
+                <input type="password" name="password" id="password" placeholder="Enter a password" required autocomplete="none">
+                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm password" required autocomplete="none">
+                <button type="submit" id="signup-btn">Sign Up</button>
+            </form>
         </div>
     </main>
 </body>

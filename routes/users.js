@@ -40,7 +40,7 @@ router.route("/")
                 return;
             }
 
-            const user = new User(req.body.username, req.body.email, req.body.password);
+            const user = new User(req.body.username, req.body.email, req.body.password, users.length);
             users.push(user);
             res.json(users[users.length - 1]);
         } else {
