@@ -6,6 +6,7 @@ body {
 
 * {
     box-sizing: border-box;
+    margin: 0;
 }
 
 .dark-mode {
@@ -47,6 +48,14 @@ section {
     width: 80%;
 }
 
+section > :is(h1, h2) {
+    margin-bottom: 10px;
+}
+
+section > h2 {
+    margin-top: 15px;
+}
+
 .form-container {
     display: block;
     border-radius: 8px;
@@ -68,7 +77,6 @@ form > input, #signup-btn {
 form > h1 {
     top: 30px;
     position: absolute;
-    margin: 0;
     text-align: center;
     width: 100%;
 }
@@ -109,8 +117,8 @@ th {
     text-align: left;
 }
 
-th > h3 {
-    margin: 0;
+th, td {
+    border: 1px solid #ddd;
 }
 
 #users th:first-child, tr:first-child {
@@ -121,19 +129,11 @@ th > h3 {
     width: 360px;
 }
 
-#users td {
-    margin: auto;
-}
-
 #users td:nth-child(2) {
     font-family: 'Courier New', Courier, monospace; 
     font-size: 14px;
 }
 
-#users tr {
-    border-bottom: 1px solid #ddd;
-}
-
-#users tr > td {
-    padding: 8px 0;
+:is(#users, #about-api) tr > :is(td, th) {
+    padding: 8px 4px;
 }

@@ -1,8 +1,9 @@
 import express from "express";
-import { messages, users } from "../data/data.js";
+import { chats, messages, users } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
-import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys } from "../functions/functions.js";
+import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, removeChatMessages } from "../functions/functions.js";
+import Chat from "../classes/Chat.js";
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.route("/")
 
             const user = new User(req.body.username, req.body.email, req.body.password, users.length);
             users.push(user);
-            res.json(users[users.length - 1]);
+            res.status(201).json(users[users.length - 1]);
         } else {
             throw new EndpointError(400, "Insufficient Data");
         }
@@ -78,6 +79,7 @@ router.route("/:id")
             if (u.id == req.params.id) {
                 users[i] = new User(req.params.id, "Deleted User");
                 // Delete user only by removing their credentials but keep a deleted user placeholder for chats with them in it
+                return true;
             }
         });
         if (!user) {
@@ -87,19 +89,87 @@ router.route("/:id")
     });
 
 // Get all chats that the user is in
-router.get("/:id/chats", (req, res) => {
-    const userChats = findUserChats(req.params.id);
-    res.json(userChats);
-});
+router.route("/:id/chats")
+    .get((req, res) => {
+        const userChats = findUserChats(req.params.id);
+        res.json(userChats);
+    })
+    .post((req, res) => {
+        if (req.body && req.body.users instanceof Array && verifyKeys(req.body, ["users", "image_url", "name"])) {
+            if (!req.body.users.includes(Number(req.params.id))) {
+                req.body.users.push(req.params.id);
+            }
+            const chatUsers = findUsersByIds(req.body.users);
+            if (chatUsers.length < 2) {
+                throw new EndpointError(400, "A chat must contain at least 2 different users");
+            }
+
+            // Using chats.length as the id since it is easier to predict in this environment; normally use a randomly generated id
+            const chat = new Chat(req.body.image_url, chatUsers, chats.length, req.body.name);
+            chats.push(chat);
+            res.status(201).json(chats[chats.length - 1]);
+        } else {
+            throw new EndpointError(400, "Insufficient Data");
+        }
+    });
 
 // Get the particular chat that the user is in
-router.get("/:id/chats/:chatId", (req, res) => {
-    const userChat = findUserChat(req.params.id, req.params.chatId);
-    if (!userChat) {
-        throw new EndpointError(404, "User is not part of the chat group");
-    }
-    res.json(userChat);
-});
+router.route("/:id/chats/:chatId")
+    .get((req, res) => {
+        const userChat = findUserChat(req.params.id, req.params.chatId);
+        if (!userChat) {
+            throw new EndpointError(404, "User is not part of the chat group");
+        }
+        res.json(userChat);
+    })
+    .patch((req, res) => { // Handle inviting users to the chat and changing the name and/or photo
+        if (verifyKeys(req.body, ["users", "image_url", "name"])) {
+            const chat = chats.find((c, i) => {
+                if (c.id == req.params.chatId) {
+                    for (const key in req.body) {
+                        if (key != "users"){ // Handle changing name or image_url
+                            console.log(key);
+                            chats[i][key] = req.body[key];
+                            console.log(req.body[key]);
+                        } else if (key === "users" && req.body[key] instanceof Array) { // Handle inviting users
+                            addNonChatUsersByIds(req.body[key], chats[i]);
+                        } else {
+                            throw new EndpointError(400, "Invalid usage of inviting users");
+                        }
+                    }
+                    return true;
+                }
+            });
+            res.json(chat);
+        } else {
+            console.log(verifyKeys(req.body, ["users", "image_url", "name"]), req.body);
+            throw new EndpointError(400, "Insufficient Data");
+        }
+    })
+    .delete((req, res) => { // Handle leaving the chat or deleting it (deletes if the last user leaves the chat)
+        if (!userExists(req.params.id)) {
+            throw new EndpointError(404, "User does not exist");
+        } else if (!chatExists(req.params.chatId)) {
+            throw new EndpointError(404, "Chat does not exist");
+        }
+        const userChat = chats.find((c, i) => {
+            if (c.hasUser(req.params.id) && c.id == req.params.chatId) {
+                const removed = chats[i].removeUser(req.params.id);
+                if (!removed) {
+                    throw new EndpointError(500, "Unexpected error occurred when leaving the chat")
+                }
+                if (chats[i].numUsers === 0) { // Delete the chat if no users remain
+                    removeChatMessages(req.params.chatId); // Cascade delete the messages of the chat
+                    chats.splice(i, 1);
+                }
+                return true;
+            }
+        });
+        if (!userChat) {
+            throw new EndpointError(404, "User is not part of the chat group");
+        }
+        res.json(userChat);
+    });
 
 // Get the messages of a chat that the user is in
 router.get("/:id/chats/:chatId/messages", (req, res) => {

@@ -1,7 +1,7 @@
 import express from "express";
 import { messages } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
-import { verifyKeys } from "../functions/functions.js";
+import { chatExists, userExists, verifyKeys } from "../functions/functions.js";
 
 const router = express.Router();
 
@@ -15,10 +15,10 @@ router.get("/", (req, res) => {
             const message = messages.find(m => m.id == messageId);
             if (message) {
                 res.json(message);
-            } else {
-                throw new EndpointError(404, "Message does not exist");
+                return;
             }
         }
+        throw new EndpointError(404, "Message does not exist");
     } else if (Object.keys(req.query).length < 4 && verifyKeys(req.query, ["userId", "chatId", "limit"])) {
         const userId = req.query["userId"];
         const chatId = req.query["chatId"];
@@ -41,6 +41,7 @@ router.get("/", (req, res) => {
         if (limit) {
             queriedMessages = queriedMessages.slice(Number(limit) * -1);
         }
+        res.json(queriedMessages);
     } else if (req.query) {
         throw new EndpointError(403, "Query must contain 'userId', 'chatId', and/or 'limit', or only 'messageId'.");
     } else {

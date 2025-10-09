@@ -13,4 +13,13 @@ export default class EndpointError {
     get message() {
         return this.#message;
     }
+
+    toJSON() {
+        return (
+            {
+                status: this.status,
+                message: this.message
+            }
+        )
+    }
 }

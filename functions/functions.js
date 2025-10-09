@@ -16,7 +16,7 @@ export function generateRandomId(min=10, max=99) {
 
 /**
  * Checks if a User instance with the provided userId exists
- * @param {number} userId
+ * @param {number | string} userId
  * @returns {boolean}
  */
 export function userExists(userId) {
@@ -25,7 +25,7 @@ export function userExists(userId) {
 
 /**
  * Checks if a Chat instance with the provided chatId exists
- * @param {number} chatId
+ * @param {number | string} chatId
  * @returns {boolean}
  */
 export function chatExists(chatId) {
@@ -34,7 +34,7 @@ export function chatExists(chatId) {
 
 /**
  * Checks if a Message instance with the provided messageId exists
- * @param {number} messageId
+ * @param {number | string} messageId
  * @returns {boolean}
  */
 export function messageExists(messageId) {
@@ -43,7 +43,7 @@ export function messageExists(messageId) {
 
 /**
  * Returns all chats that the user is in
- * @param {number} userId - Id of the user
+ * @param {number | string} userId - Id of the user
  * @returns {Chat[]} Array of Chat instances that the user is in
  */
 export function findUserChats(userId) {
@@ -55,8 +55,8 @@ export function findUserChats(userId) {
 
 /**
  * Returns the particular chat that the user is in. Also used to verify if a user is in the chat
- * @param {number} userId - Id of the user
- * @param {number} chatId - Id of the chat
+ * @param {number | string} userId - Id of the user
+ * @param {number | string} chatId - Id of the chat
  * @returns {Chat | undefined} Chat instance that the user is part of or undefined if that chat doesn't exist or doesn't contain the user
  */
 export function findUserChat(userId, chatId) {
@@ -70,7 +70,7 @@ export function findUserChat(userId, chatId) {
 
 /**
  * Returns all messages that the user sent
- * @param {number} userId - Id of the user
+ * @param {number | string} userId - Id of the user
  * @returns {Message[]} Array of Message instances that the user sent
  */
 export function findUserMessages(userId) {
@@ -82,8 +82,8 @@ export function findUserMessages(userId) {
 
 /**
  * Returns all messages a user sent for a particular chat
- * @param {number} userId - Id of the user
- * @param {number} chatId - Id of the chat
+ * @param {number | string} userId - Id of the user
+ * @param {number | string} chatId - Id of the chat
  * @returns {Message[]} Array of Message instances that the user sent to a chat
  */ 
 export function findUserChatMessages(userId, chatId) {
@@ -137,6 +137,12 @@ export function findUserChatMessage(userId, chatId, messageId) {
     return messages.find(m => m.userId == userId && m.chatId == chatId && m.id == messageId);
 }
 
+/**
+ * Verifies that an object's keys are only entries from the allowed keys
+ * @param {object} obj 
+ * @param {string[]} allowedKeys 
+ * @returns 
+ */
 export function verifyKeys(obj, allowedKeys) {
     for (const key in obj) {
         if (!allowedKeys.includes(key)) {                
@@ -144,4 +150,58 @@ export function verifyKeys(obj, allowedKeys) {
         }
     }
     return true;
+}
+
+/**
+ * Returns a list of users matching the list of ids (used to create a chat)
+ * @param {number[] | string[]} ids - Array of userIds
+ * @returns 
+ */
+export function findUsersByIds(ids){
+    const results = [];
+    for(const id of ids){
+        const user = users.find(u => u.id == id);
+        if(!user) {
+            throw new EndpointError(404, "User does not exist");
+        }
+        results.push(user);
+    }
+    return results;
+}
+
+/**
+ * Adds users to a chat if the chat exists, users exist, and they are not already in the chat
+ * @param {number[] | string[]} ids - Array of userIds
+ * @param {Chat} chat 
+ * @returns 
+ */
+export function addNonChatUsersByIds(ids, chat){
+    if (!chat) {
+        throw new EndpointError(404, "Chat does not exist");
+    }
+    for(const id of ids){
+        const user = users.find(u => u.id == id);
+        if(!user) {
+            throw new EndpointError(404, "User does not exist");
+        } else if (chat.hasUser(id)){
+            throw new EndpointError(409, "User is already in the chat");
+        }
+        chat.addUser(id);
+    }
+}
+
+/**
+ * Removes all messages from a chat
+ * @param {number | string} chatId
+ */
+export function removeChatMessages(chatId) {
+    if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    }
+    for(let i = 0; i < messages.length; i++){
+        if (messages[i].chatId == chatId){
+            messages.splice(i, 1);
+            i--;
+        }
+    }
 }
