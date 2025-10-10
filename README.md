@@ -181,3 +181,144 @@ const message4 = new Message(2, 2, "This is a test", 5);
 const message5 = new Message(2, 2, "test again", 6);
 
 const messages = [message1, message2, message3, message4, message5, message6];</code></pre>
+
+## Users Endpoint
+
+<table>
+    <tr>
+        <th><h3>Method</h3></th>
+        <th><h3>Endpoint</h3></th>
+        <th><h3>Description</h3></th>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users</td>
+        <td>Retrieves all users.</td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users?userId={id}</td>
+        <td>
+            Retrieves a particular user with that id using a query.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id</td>
+        <td>Retrieves a particular user with that id.</td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats</td>
+        <td>
+            Retrieves all chats that the user with that id is in.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats/:chatId</td>
+        <td>
+            Retrieves information on the specific chat if the user is in it.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats/:chatId/messages</td>
+        <td>
+            Retrieves all messages of a particular chat that the user is in.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats/:chatId/messages?limit={num}</td>
+        <td>
+            Retrieves the {num} most recent messages of the chat.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats/:chatId/messages?userId={id}</td>
+        <td>
+            Retrieves all messages belonging to the userId of {id} if the user requesting the messages and the requested user are both in that chat.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/chats/:chatId/messages/:messageId</td>
+        <td>
+            Retrieves a particular message from a particular chat if the user requesting the message is in the chat.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/users/:id/messages</td>
+        <td>
+            Retrieves all messages that the user with userId of id sent.
+        </td>
+    </tr>
+    <tr>
+        <td>/POST</td>
+        <td>/users</td>
+        <td>
+            Creates a new user and adds it to the static array of Users if the username and email are unique. There are other constraints for the username, email, and password field that are expected to be handled in the front-end. The form at the end of this section is an example that properly handles this behavior.
+        </td>
+    </tr>
+    <tr>
+        <td>/POST</td>
+        <td>/users/:id/chats</td>
+        <td>
+            Creates a new chat containing the creator and at least one other user. By default, the name of the chat is a list of all user's usernames in the chat. Optionally can include a name and image url.
+        </td>
+    </tr>
+    <tr>
+        <td>/POST</td>
+        <td>/users/:id/chats/:chatId/messages</td>
+        <td>
+            Creates a new message for a chat. Only accepts a message. The server automatically sets the other important message fields.
+        </td>
+    </tr>
+    <tr>
+        <td>/PATCH</td>
+        <td>/users/:id</td>
+        <td>
+            Modifies an existing user's password and/or email. Restrictions are placed to prevent users from changing their username or id.
+        </td>
+    </tr>
+    <tr>
+        <td>/PATCH</td>
+        <td>/users/:id/chats/:chatId</td>
+        <td>
+            Modifies an existing chat's name, image_url, or invites new user(s) to the chat. Restrictions are placed to prevent users from directly changing the list of userIds, id of the chat, and timestamp of the chat (when it was created).
+        </td>
+    </tr>
+    <tr>
+        <td>/PATCH</td>
+        <td>/users/:id/chats/:chatId/messages/:messageId</td>
+        <td>
+            Modifies an existing message of an existing user from an existing chat only if the contents of a message are being modified. Restrictions are placed to prevent users from changing the id, timestamps, senderId, and chatId.
+        </td>
+    </tr>
+    <tr>
+        <td>/DELETE</td>
+        <td>/users/:id</td>
+        <td>
+            Deletes the user's account. A temporary placeholder is created in its place in case the user is in any chat groups.
+        </td>
+    </tr>
+    <tr>
+        <td>/DELETE</td>
+        <td>/users/:id/chats/:chatId</td>
+        <td>
+            Initiates leaving the chat or deleting it if the last user leaves the chat. Also deletes any messages related to the chat when the chat is deleted.
+        </td>
+    </tr>
+    <tr>
+        <td>/DELETE</td>
+        <td>/users/:id/chats/:chatId/messages/:messageId</td>
+        <td>
+            Deletes an existing message of an existing user from an existing chat only if the message belongs to the user and the user is in the chat.
+        </td>
+    </tr>
+</table>
+
+## Chats Endpoint

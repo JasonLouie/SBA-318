@@ -20,7 +20,7 @@ export function generateRandomId(min=10, max=99) {
  * @returns {boolean}
  */
 export function userExists(userId) {
-    return users.find(u => u.id == userId) != undefined;
+    return users.find(u => u.id == userId && u.email != null) != undefined;
 }
 
 /**
@@ -134,7 +134,7 @@ export function findChatUsers(chatId) {
             chatUsers.push(chat.userId);
         }
     }
-    return users.filter(u => chatUsers.includes(u.id));
+    return users.filter(u => chatUsers.includes(u.id) && u.email != null);
 }
 
 /**
@@ -178,7 +178,7 @@ export function verifyKeys(obj, allowedKeys) {
 export function findUsersByIds(ids){
     const results = [];
     for(const id of ids){
-        const user = users.find(u => u.id == id);
+        const user = users.find(u => u.id == id && u.email != null);
         if(!user) {
             throw new EndpointError(404, "User does not exist");
         }
@@ -198,7 +198,7 @@ export function addNonChatUsersByIds(ids, chat){
         throw new EndpointError(404, "Chat does not exist");
     }
     for(const id of ids){
-        const user = users.find(u => u.id == id);
+        const user = users.find(u => u.id == id && u.email != null);
         if(!user) {
             throw new EndpointError(404, "User does not exist");
         } else if (chat.hasUser(id)){

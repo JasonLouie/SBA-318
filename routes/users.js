@@ -49,7 +49,7 @@ router.route("/")
 
 router.route("/:id")
     .get((req, res) => {
-        const user = users.find(u => u.id == req.params.id);
+        const user = users.find(u => u.id == req.params.id && u.email != null);
         if (!user) {
             throw new EndpointError(404, "User does not exist");
         }
@@ -58,7 +58,7 @@ router.route("/:id")
     .patch((req, res) => { // Change email or password
         if (req.body && verifyKeys(req.body, ["email", "password"])) {
             const user = users.find((u, i) => {
-                if (u.id == req.params.id) {
+                if (u.id == req.params.id && u.email != null) {
                     for (const key in req.body) {
                         users[i][key] = req.body[key];
                     }
@@ -77,8 +77,8 @@ router.route("/:id")
     })
     .delete((req, res) => { // Delete user
         const user = users.find((u, i) => {
-            if (u.id == req.params.id) {
-                users[i] = new User(req.params.id, "Deleted User");
+            if (u.id == req.params.id && u.email != null) {
+                users[i] = new User("Deleted User", null, null, req.params.id);
                 // Delete user only by removing their credentials but keep a deleted user placeholder for chats with them in it
                 return true;
             }
