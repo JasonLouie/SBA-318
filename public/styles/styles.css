@@ -9,6 +9,10 @@ body {
     margin: 0;
 }
 
+.cursor-loading {
+    cursor: progress;
+}
+
 .dark-mode {
     background-color: #000;
     color: white;
@@ -16,6 +20,7 @@ body {
 
 nav {
     position: fixed;
+    z-index: 10;
     width: 100%;
     display: flex;
     align-items: center;
@@ -48,6 +53,10 @@ section {
     width: 80%;
 }
 
+span.code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 section > :is(h1, h2) {
     margin-bottom: 10px;
 }
@@ -57,14 +66,54 @@ section > h2 {
 }
 
 .form-container {
-    display: block;
-    border-radius: 8px;
-    background-color: #444444;
+    display: flex;
+}
+
+#form-response {
+    margin-left: 40px;
     height: 370px;
     width: 350px;
 }
 
-form > input, #signup-btn {
+#upper {
+    background-color: #040229;
+    border-radius: 8px 8px 0 0;
+    height: 60%;
+}
+
+#lower {
+    background-color: #555;
+    border-radius: 0 0 8px 8px;
+    height: 40%;
+}
+
+#lower > ul {
+    padding: 10px 12px;
+}
+
+#lower > ul > li {
+    font-size: 14px;
+    margin: 6px 0 0 20px;
+}
+
+#upper > h3 {
+    padding: 10px 12px;
+}
+
+#status, #response {
+    padding: 0 12px;
+}
+
+#status {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.key {
+    color: #0077b6;
+}
+
+form > input, #signup-btn, #form-alert {
     display: block;
     position: absolute;
     left: 50%;
@@ -81,10 +130,19 @@ form > h1 {
     width: 100%;
 }
 
+#form-alert {
+    top: 80px;
+    padding: 0;
+    font-size: 15px;
+    text-align: center;
+}
+
 #signup-form {
     position: relative;
-    width: inherit;
-    height: inherit;
+    height: 370px;
+    width: 350px;
+    background-color: #444444;
+    border-radius: 8px;
 }
 
 #signup-form > [name="username"] {
@@ -109,6 +167,10 @@ form > h1 {
     cursor: pointer;
 }
 
+span.endpoint {
+    display: block;
+} 
+
 table {
     width: 100%;
 }
@@ -121,19 +183,19 @@ th, td {
     border: 1px solid #ddd;
 }
 
-#users th:first-child, tr:first-child {
+:is(#http-responses, .endpoints-table) th:first-child, tr:first-child {
     width: 85px;
 }
 
 #users th:nth-child(2), td:nth-child(2) {
-    width: 360px;
+    width: 400px;
 }
 
-#users td:nth-child(2) {
+.endpoints-table td:nth-child(2) {
     font-family: 'Courier New', Courier, monospace; 
     font-size: 14px;
 }
 
-:is(#users, #about-api) tr > :is(td, th) {
-    padding: 8px 4px;
+tr > :is(td, th) {
+    padding: 6px 8px;
 }

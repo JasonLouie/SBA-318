@@ -25,11 +25,12 @@ const chats = [chat1, chat2, chat3, chat4];
 const message1 = new Message(1, 1, "Hello there", 1);
 const message2 = new Message(2, 1, "Howdy", 2);
 const message3 = new Message(1, 1, "Nice to meet you", 3);
+const message6 = new Message(2, 1, "Another message", 7);
 
 // Chat 2
 const message4 = new Message(2, 2, "This is a test", 5);
 const message5 = new Message(2, 2, "test again", 6);
 
-const messages = [message1, message2, message3, message4, message5];
+const messages = [message1, message2, message3, message4, message5, message6];
 
 export {users, chats, messages};

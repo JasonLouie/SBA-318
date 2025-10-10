@@ -32,11 +32,60 @@
                     available for all users with an account. The chats and
                     messages endpoints are not meant for all users to access
                     (mainly administrators). For the scope of this project, some
-                    methods are implemented and enabled. Below is a table
-                    explaining the classes in this project and a code snippet
-                    with comments for static data.
+                    methods are implemented and enabled. Below are tables
+                    explaining the HTTP Responses, classes in this project, and
+                    a code snippet with comments for static data.
                 </p>
-
+                <h2>Base URL</h2>
+                <p>
+                    The base url for the api is
+                    <span class="code">localhost:3000/api/v1</span>
+                </p>
+                <h2>HTTP Responses</h2>
+                <table id="http-responses">
+                    <tr>
+                        <th><h3>Status Code</h3></th>
+                        <th><h3>Description</h3></th>
+                    </tr>
+                    <tr>
+                        <td>200 - OK</td>
+                        <td>Successfully retrieved information.</td>
+                    </tr>
+                    <tr>
+                        <td>201 - Created</td>
+                        <td>Succesfully created new entry.</td>
+                    </tr>
+                    <tr>
+                        <td>400 - Bad Request</td>
+                        <td>Missing information in the request body.</td>
+                    </tr>
+                    <tr>
+                        <td>403 - Forbidden</td>
+                        <td>
+                            Attempting to modify or delete data that should not
+                            be modified/deleted or does not exist.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>404 - Not Found</td>
+                        <td>The resource does not exist.</td>
+                    </tr>
+                    <tr>
+                        <td>409 - Conflict</td>
+                        <td>
+                            Attempting to create a new resource when it already
+                            exists (happens when certain fields should be
+                            unique).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>500 - Internal Server Error</td>
+                        <td>
+                            An unexpected error occurred when sending the
+                            request.
+                        </td>
+                    </tr>
+                </table>
                 <h2>Classes</h2>
                 <table id="classes">
                     <tr>
@@ -52,8 +101,7 @@
                         </td>
                         <td>
                             <pre><code>{
-    status: this.status,
-    message: this.message
+    message: string
 }</code></pre>
                         </td>
                         <td>
@@ -69,10 +117,10 @@
                         </td>
                         <td>
                             <pre><code>{
-    id: this.#id,
-    username: this.#username,
-    email: this.email,
-    password: this.password
+    id: number,
+    username: string,
+    email: string,
+    password: string
 }</code></pre>
                         </td>
                         <td>
@@ -91,13 +139,13 @@
                         </td>
                         <td>
                             <pre><code>{
-    id: this.#id,
-    name: this.name,
-    image_url: this.#image_url,
-    preview: this.preview,
-    users: this.#users,
-    dateCreated: this.dateCreated,
-    timeCreated: this.timeCreated
+    id: number,
+    name: string,
+    image_url: string,
+    preview: Message (JSON format),
+    users: number[],
+    dateCreated: string,
+    timeCreated: string
 }</code></pre>
                         </td>
                         <td>
@@ -110,16 +158,18 @@
                     <tr>
                         <td>Message.js</td>
                         <td>
-                            id (private, number), senderId (private, number), chatId (private, number), message (public, string), timestamp (private, Date object)
+                            id (private, number), senderId (private, number),
+                            chatId (private, number), message (public, string),
+                            timestamp (private, Date object)
                         </td>
                         <td>
                             <pre><code>{
-    id: this.#id,
-    senderId: this.#senderId,
-    chatId: this.#chatId,
-    message: this.message,
-    dateSent: this.dateSent,
-    timeSent: this.timeSent
+    id: number,
+    senderId: number,
+    chatId: number,
+    message: string,
+    dateSent: string,
+    timeSent: string
 }</code></pre>
                         </td>
                         <td>
@@ -155,18 +205,19 @@ const chats = [chat1, chat2, chat3, chat4];
 const message1 = new Message(1, 1, "Hello there", 1);
 const message2 = new Message(2, 1, "Howdy", 2);
 const message3 = new Message(1, 1, "Nice to meet you", 3);
+const message6 = new Message(2, 1, "Another message", 7);
 
 // Chat 2
 const message4 = new Message(2, 2, "This is a test", 5);
 const message5 = new Message(2, 2, "test again", 6);
 
-const messages = [message1, message2, message3, message4, message5];</code></pre>
+const messages = [message1, message2, message3, message4, message5, message6];</code></pre>
             </section>
             <section id="users-endpoint">
-                <h1>Users Endpoint</h1>
+                <h1>Table of Users Endpoint</h1>
                 <p>This section contains information on the /users endpoint.</p>
                 <h2>Table of Endpoints</h2>
-                <table id="users">
+                <table id="users" class="endpoints-table">
                     <tr>
                         <th><h3>Method</h3></th>
                         <th><h3>Endpoint</h3></th>
@@ -181,21 +232,21 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                         <td>/GET</td>
                         <td>/users?userId={id}</td>
                         <td>
-                            Retrieves a particular user with userId of id using
-                            a query.
+                            Retrieves a particular user with that id using a
+                            query.
                         </td>
                     </tr>
                     <tr>
                         <td>/GET</td>
                         <td>/users/:id</td>
-                        <td>Retrieves a particular user with userId of id.</td>
+                        <td>Retrieves a particular user with that id.</td>
                     </tr>
                     <tr>
                         <td>/GET</td>
                         <td>/users/:id/chats</td>
                         <td>
-                            Retrieves all chats that the user with userId of id
-                            is in.
+                            Retrieves all chats that the user with that id is
+                            in.
                         </td>
                     </tr>
                     <tr>
@@ -216,7 +267,7 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                     </tr>
                     <tr>
                         <td>/GET</td>
-                        <td>/:id/chats/:chatId/messages?limit={num}</td>
+                        <td>/users/:id/chats/:chatId/messages?limit={num}</td>
                         <td>
                             Retrieves the {num} most recent messages of the
                             chat.
@@ -224,7 +275,7 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                     </tr>
                     <tr>
                         <td>/GET</td>
-                        <td>/:id/chats/:chatId/messages?userId={id}</td>
+                        <td>/users/:id/chats/:chatId/messages?userId={id}</td>
                         <td>
                             Retrieves all messages belonging to the userId of
                             {id} if the user requesting the messages and the
@@ -233,7 +284,7 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                     </tr>
                     <tr>
                         <td>/GET</td>
-                        <td>/:id/chats/:chatId/messages/:messageId</td>
+                        <td>/users/:id/chats/:chatId/messages/:messageId</td>
                         <td>
                             Retrieves a particular message from a particular
                             chat if the user requesting the message is in the
@@ -256,8 +307,27 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                             of Users if the username and email are unique. There
                             are other constraints for the username, email, and
                             password field that are expected to be handled in
-                            the front-end. The form HERE is an example that
-                            properly handles this behavior.
+                            the front-end. The form at the end of this section
+                            is an example that properly handles this behavior.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/POST</td>
+                        <td>/users/:id/chats</td>
+                        <td>
+                            Creates a new chat containing the creator and at
+                            least one other user. By default, the name of the
+                            chat is a list of all user's usernames in the chat.
+                            Optionally can include a name and image url.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/POST</td>
+                        <td>/users/:id/chats/:chatId/messages</td>
+                        <td>
+                            Creates a new message for a chat. Only accepts a
+                            message. The server automatically sets the other
+                            important message fields.
                         </td>
                     </tr>
                     <tr>
@@ -282,13 +352,13 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                     </tr>
                     <tr>
                         <td>/PATCH</td>
-                        <td>/:id/chats/:chatId/messages/:messageId</td>
+                        <td>/users/:id/chats/:chatId/messages/:messageId</td>
                         <td>
                             Modifies an existing message of an existing user
-                            from an existing chat only if the message is being
-                            modified. Restrictions are placed to prevent users
-                            from changing the id, timestamps, senderId, and
-                            chatId.
+                            from an existing chat only if the contents of a
+                            message are being modified. Restrictions are placed
+                            to prevent users from changing the id, timestamps,
+                            senderId, and chatId.
                         </td>
                     </tr>
                     <tr>
@@ -311,7 +381,7 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                     </tr>
                     <tr>
                         <td>/DELETE</td>
-                        <td>/:id/chats/:chatId/messages/:messageId</td>
+                        <td>/users/:id/chats/:chatId/messages/:messageId</td>
                         <td>
                             Deletes an existing message of an existing user from
                             an existing chat only if the message belongs to the
@@ -323,6 +393,7 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                 <div class="form-container">
                     <form id="signup-form" novalidate>
                         <h1>Sign Up</h1>
+                        <p id="form-alert"></p>
                         <input
                             type="text"
                             name="username"
@@ -355,13 +426,121 @@ const messages = [message1, message2, message3, message4, message5];</code></pre
                             Sign Up
                         </button>
                     </form>
+                    <div id="form-response">
+                        <div id="upper">
+                            <h3>Response From the Server</h3>
+                            <p id="status">Status:</p>
+                            <div id="signup-response"></div>
+                        </div>
+                        <div id="lower">
+                            <ul>
+                                Expected Status Codes
+                                <li>201: Succesfully created new user.</li>
+                                <li>409: Username or Email is taken.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
             <section id="chats-endpoint">
                 <h1>Chats Endpoint</h1>
+                <h2>Table of Chats Endpoints</h2>
+                <table id="chats" class="endpoints-table">
+                    <tr>
+                        <th><h3>Method</h3></th>
+                        <th><h3>Endpoint</h3></th>
+                        <th><h3>Description</h3></th>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/chats</td>
+                        <td>Retrieves all chats.</td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/chats/:id</td>
+                        <td>Retrieves a particular chat with that id.</td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/chats/:id/users</td>
+                        <td>
+                            Retrieves all users that are in a particular chat
+                            with that id.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/chats/:id/messages</td>
+                        <td>
+                            Retrieves all messages that are in a particular chat
+                            with that id.
+                        </td>
+                    </tr>
+                </table>
             </section>
-            <section id="messages-endpoint">
+            <section id="messages-endpoint" class="endpoints-table">
                 <h1>Messages Endpoint</h1>
+                <h2>Table of Messages Endpoints</h2>
+                <table id="messages">
+                    <tr>
+                        <th><h3>Method</h3></th>
+                        <th><h3>Endpoint</h3></th>
+                        <th><h3>Description</h3></th>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/messages</td>
+                        <td>Retrieves all messages.</td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>
+                            <span class="endpoint"
+                                >/messages?messageId={id}</span
+                            >
+                        </td>
+                        <td>
+                            Retrieves a particular message with that id using a
+                            query. Not compatible with the other string queries
+                            in the next row.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>
+                            <span class="endpoint">/messages?userId={id}</span>
+                            <span class="endpoint">/messages?chatId={id}</span>
+                            <span class="endpoint">/messages?limit={num}</span>
+                        </td>
+                        <td>
+                            Retrieves messages filtered by the string queries
+                            userId, chatId, and limit. They can be used
+                            interchangeably. The limit retrieves the {num} most
+                            recent messages.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/GET</td>
+                        <td>/messages/:id</td>
+                        <td>Retrieves a particular message with that id.</td>
+                    </tr>
+                    <tr>
+                        <td>/PATCH</td>
+                        <td>/messages/:id</td>
+                        <td>
+                            Modifies an existing message only if the contents of
+                            a message are being modified. Restrictions are
+                            placed to prevent users from changing the id,
+                            timestamps, senderId, and chatId.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>/DELETE</td>
+                        <td>/messages/:id</td>
+                        <td>Deletes an existing message.</td>
+                    </tr>
+                </table>
             </section>
         </main>
     </body>

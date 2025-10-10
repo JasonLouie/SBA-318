@@ -8,6 +8,9 @@ import { timeOptions } from "./constants/time.js";
 const app = express();
 const port = 3000;
 
+app.use(express.urlencoded());
+app.use(express.json());
+
 app.set("view engine", "ejs");
 
 app.use(express.static("public"));
@@ -18,16 +21,13 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.urlencoded());
-app.use(express.json());
-
 app.get("/", (req, res) => {
     res.render("index");
 });
 
-app.use("/users", userRouter);
-app.use("/chats", chatRouter);
-app.use("/messages", messageRouter);
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/chats", chatRouter);
+app.use("/api/v1/messages", messageRouter);
 
 // Invalid route handler
 app.use((req, res, next) => {

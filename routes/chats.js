@@ -1,6 +1,7 @@
 import express from "express";
 import { chats } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
+import { findChatMessages, findChatUsers } from "../functions/functions.js";
 
 const router = express.Router();
 
@@ -17,7 +18,13 @@ router.get("/:id", (req, res) => {
 });
 
 router.get("/:id/users", (req, res) => {
+    const chatUsers = findChatUsers(req.params.id);
+    res.json(chatUsers);
+});
 
+router.get("/:id/messages", (req, res) => {
+    const chatMessages = findChatMessages(req.params.id);
+    res.json(chatMessages);
 });
 
 export default router;

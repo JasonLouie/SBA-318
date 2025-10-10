@@ -17,7 +17,6 @@ export default class EndpointError {
     toJSON() {
         return (
             {
-                status: this.status,
                 message: this.message
             }
         )

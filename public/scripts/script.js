@@ -1,18 +1,21 @@
 import { signUp } from "./requests.js";
 const form = document.getElementById("signup-form");
+const signUpBtn = document.getElementById("signup-btn");
+const status = document.getElementById("status");
+const formAlert = document.getElementById("form-alert");
 const usernameField = document.getElementById("username");
 const emailField = document.getElementById("email");
 const passwordField = document.getElementById("password");
 const confirmPasswordField = document.getElementById("confirmPassword");
+const signupResponse = document.getElementById("signup-response");
 
 usernameField.addEventListener("input", validateUsername);
 emailField.addEventListener("input", validateEmail)
 passwordField.addEventListener("input", validatePassword);
-confirmPasswordField.addEventListener("input", validateBothPasswords);
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
+    signUpBtn.disabled = true;
     validateUsername({ target: usernameField });
     validateEmail({ target: emailField });
     validatePassword({ target: passwordField });
@@ -26,32 +29,40 @@ form.addEventListener("submit", async (e) => {
             });
             form.reset();
             alert("Sign up successful!");
+            showSignUpResponse(response);
         } catch (error) {
             if (error.status === 409) {
                 const conflictType = error.response.data.error.split(" ")[0];
-                if (conflictType === "Email"){
+                if (conflictType === "Email") {
                     emailField.setCustomValidity(error.response.data.error);
-                } else if (conflictType === "Username"){
+                } else if (conflictType === "Username") {
                     usernameField.setCustomValidity(error.response.data.error);
                 }
                 form.reportValidity();
             }
+            showSignUpResponse(error);
+        } finally {
+            formAlert.textContent = "Request sent to the server.";
+            setTimeout(() => {
+                formAlert.textContent = "";
+            }, 3000);
         }
     } else {
-        const selectedInput = document.activeElement;
+        const selectedInput = document.activeElement; // Show validity for input user is interacting with when user submitted
         if (selectedInput && selectedInput.form === form && selectedInput.localName === "input" && !selectedInput.checkValidity()) {
             if (selectedInput === confirmPasswordField) {
                 passwordField.reportValidity();
             } else {
                 selectedInput.reportValidity();
             }
-        } else {
+        } else { // If an input is not selected and user submitted, then show validity for the first input that is invalid
             const firstInvalidField = form.querySelector(':invalid');
             if (firstInvalidField) {
                 firstInvalidField.reportValidity();
             }
         }
     }
+    signUpBtn.disabled = false;
 });
 
 function validateUsername(e) {
@@ -94,13 +105,35 @@ function validatePassword(e) {
     }
 }
 
-function validateBothPasswords(e) {
-    const form = document.getElementById("signup-form");
-    const password = form.elements["password"];
-    const confirmPassword = e.target;
-    if (password.value != confirmPassword.value) {
-        password.setCustomValidity("Both passwords must match.");
+function showSignUpResponse(response) {
+    clearResponse();
+    const frag = new DocumentFragment();
+    const div = frag.appendChild(Object.assign(document.createElement("div"), {id: "response"}))
+    const pre = div.appendChild(document.createElement("pre"));
+    if (response.status === 201) {
+        status.textContent = `Status Code: ${response.status}`;
+        pre.innerHTML = `{
+    <span class="key">id</span>: ${response.data.id},
+    <span class="key">username</span>: "${response.data.username}",
+    <span class="key">email</span>: "${response.data.email}",
+    <span class="key">password</span>: "${response.data.password}"
+}`
     } else {
-        password.setCustomValidity("");
+        status.textContent = `Status Code: ${response.status}`;
+        pre.innerHTML = `{
+    <span class="key">status</span>: ${response.status},
+    <span class="key">response</span>: {
+        <span class="key">data</span>: {
+            <span class="key">error</span>: "${response.response.data.error}"
+        }
+    }
+}`
+    }
+    signupResponse.appendChild(frag);
+
+    function clearResponse() {
+        if (signupResponse.firstElementChild) {
+            signupResponse.removeChild(signupResponse.firstElementChild);
+        }
     }
 }

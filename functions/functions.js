@@ -120,6 +120,24 @@ export function findChatMessage(chatId, messageId) {
 }
 
 /**
+ * Returns all users that are in the chat
+ * @param {number | string} chatId - Id of the chat
+ * @returns {User[]} Array of Chat instances that the user is in
+ */
+export function findChatUsers(chatId) {
+    if (!chatExists(chatId)) {
+        throw new EndpointError(404, "User does not exist");
+    }
+    const chatUsers = [];
+    for (const chat in chats) {
+        if (chat.chatId == chatId){
+            chatUsers.push(chat.userId);
+        }
+    }
+    return users.filter(u => chatUsers.includes(u.id));
+}
+
+/**
  * Returns a particular message from a particular chat if the user sent it
  * @param {number | string} userId
  * @param {number | string} chatId 

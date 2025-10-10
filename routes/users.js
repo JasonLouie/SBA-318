@@ -2,8 +2,9 @@ import express from "express";
 import { chats, messages, users } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
-import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, removeChatMessages } from "../functions/functions.js";
+import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, removeChatMessages, findChatUsers } from "../functions/functions.js";
 import Chat from "../classes/Chat.js";
+import Message from "../classes/Message.js";
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.route("/")
                 throw new EndpointError(409, "Email Already Taken");
             }
 
-            const user = new User(req.body.username, req.body.email, req.body.password, users.length);
+            const user = new User(req.body.username, req.body.email, req.body.password, users.length + 1);
             users.push(user);
             res.status(201).json(users[users.length - 1]);
         } else {
@@ -94,7 +95,7 @@ router.route("/:id/chats")
         const userChats = findUserChats(req.params.id);
         res.json(userChats);
     })
-    .post((req, res) => {
+    .post((req, res) => { // Creates a new chat
         if (req.body && req.body.users instanceof Array && verifyKeys(req.body, ["users", "image_url", "name"])) {
             if (!req.body.users.includes(Number(req.params.id))) {
                 req.body.users.push(req.params.id);
@@ -105,7 +106,7 @@ router.route("/:id/chats")
             }
 
             // Using chats.length as the id since it is easier to predict in this environment; normally use a randomly generated id
-            const chat = new Chat(req.body.image_url, chatUsers, chats.length, req.body.name);
+            const chat = new Chat(req.body.image_url, chatUsers, chats.length + 1, req.body.name);
             chats.push(chat);
             res.status(201).json(chats[chats.length - 1]);
         } else {
@@ -123,18 +124,17 @@ router.route("/:id/chats/:chatId")
         res.json(userChat);
     })
     .patch((req, res) => { // Handle inviting users to the chat and changing the name and/or photo
-        if (verifyKeys(req.body, ["users", "image_url", "name"])) {
+        if (req.body && verifyKeys(req.body, ["users", "image_url", "name"])) {
             const chat = chats.find((c, i) => {
                 if (c.id == req.params.chatId) {
+                    if (req.body.users && req.body.users instanceof Array) { // Handle inviting users
+                        addNonChatUsersByIds(req.body.users, chats[i]);
+                    } else {
+                        throw new EndpointError(400, "Invalid usage of inviting users");
+                    }
                     for (const key in req.body) {
-                        if (key != "users"){ // Handle changing name or image_url
-                            console.log(key);
+                        if (key != "users") { // Handle changing name or image_url
                             chats[i][key] = req.body[key];
-                            console.log(req.body[key]);
-                        } else if (key === "users" && req.body[key] instanceof Array) { // Handle inviting users
-                            addNonChatUsersByIds(req.body[key], chats[i]);
-                        } else {
-                            throw new EndpointError(400, "Invalid usage of inviting users");
                         }
                     }
                     return true;
@@ -171,34 +171,57 @@ router.route("/:id/chats/:chatId")
         res.json(userChat);
     });
 
-// Get the messages of a chat that the user is in
-router.get("/:id/chats/:chatId/messages", (req, res) => {
+router.get("/:id/chats/:chatId/users", (req, res) => {
     if (findUserChat(req.params.id, req.params.chatId)) {
-        let chatMessages = findChatMessages(req.params.chatId);
-        if (Object.keys(req.query).length > 0) {
-            if (!verifyKeys(req.query, ["userId", "limit"])) {
-                throw new EndpointError(403, "Query must be 'userId' or 'limit'.");
-            }
-            const userId = req.query["userId"];
-            const limit = req.query["limit"];
-            if (userId) {
-                if (!userExists(userId)) {
-                    throw new EndpointError(404, "User does not exist");
-                } else if (findUserChat(userId, req.params.chatId)) {
-                    chatMessages = chatMessages.filter(m => m.senderId == userId);
-                } else {
-                    throw new EndpointError(404, "User is not part of the chat group");
-                }
-            }
-            if (limit) {
-                chatMessages = chatMessages.slice(Number(limit) * -1);
-            }
-        }
-        res.json(chatMessages);
+        const chatUsers = findChatUsers(req.params.chatId);
+        res.json(chatUsers);
     } else {
         throw new EndpointError(404, "User is not part of the chat group");
     }
 });
+
+// Get the messages of a chat that the user is in
+router.route("/:id/chats/:chatId/messages")
+    .get((req, res) => {
+        if (findUserChat(req.params.id, req.params.chatId)) {
+            let chatMessages = findChatMessages(req.params.chatId);
+            if (req.query && Object.keys(req.query).length > 0) {
+                if (!verifyKeys(req.query, ["userId", "limit"])) {
+                    throw new EndpointError(403, "Query must be 'userId' or 'limit'.");
+                }
+                const userId = req.query["userId"];
+                const limit = req.query["limit"];
+                if (userId) {
+                    if (!userExists(userId)) {
+                        throw new EndpointError(404, "User does not exist");
+                    } else if (findUserChat(userId, req.params.chatId)) {
+                        chatMessages = chatMessages.filter(m => m.senderId == userId);
+                    } else {
+                        throw new EndpointError(404, "User is not part of the chat group");
+                    }
+                }
+                if (limit) {
+                    chatMessages = chatMessages.slice(Number(limit) * -1);
+                }
+            }
+            res.json(chatMessages);
+        } else {
+            throw new EndpointError(404, "User is not part of the chat group");
+        }
+    })
+    .post((req, res) => {
+        if(findUserChat(req.params.id, req.params.chatId)){
+            if (req.body.message) {
+                const message = new Message(req.params.id, req.params.chatId, req.body.message, messages.length + 1);
+                messages.push(message);
+                res.status(201).json(messages[messages.length-1]);
+            } else {
+                throw new EndpointError(400, "Insufficient or Extra Data");
+            }
+        } else {
+            throw new EndpointError(404, "User is not part of the chat group");
+        }
+    });
 
 // Route for a particular message, from a particular chat, and belonging to the user that sent it
 router.route("/:id/chats/:chatId/messages/:messageId")
@@ -249,7 +272,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
             if (message) {
                 res.json(message);
             } else {
-                throw new EndpointError(403, "Message cannot be accessed");
+                throw new EndpointError(403, "Cannot delete a message that does not belong to user");
             }
         } else {
             throw new EndpointError(404, "User is not part of the chat group");
