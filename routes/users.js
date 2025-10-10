@@ -86,7 +86,7 @@ router.route("/:id")
         if (!user) {
             throw new EndpointError(404, "User does not exist");
         }
-        res.json(user);
+        res.status(204).json(user);
     });
 
 // Get all chats that the user is in
@@ -168,7 +168,7 @@ router.route("/:id/chats/:chatId")
         if (!userChat) {
             throw new EndpointError(404, "User is not part of the chat group");
         }
-        res.json(userChat);
+        res.status(204).json(userChat);
     });
 
 router.get("/:id/chats/:chatId/users", (req, res) => {
@@ -270,7 +270,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
                 }
             });
             if (message) {
-                res.json(message);
+                res.status(204).json(message);
             } else {
                 throw new EndpointError(403, "Cannot delete a message that does not belong to user");
             }

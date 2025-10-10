@@ -2,6 +2,10 @@
 
 This is an express server application. It is an WebChatAPI created to handle text chats between two or more users and uses Node.js, Express, and EJS (to render a view). At the moment, it is not connected to any databases and uses static data. Any information created, updated, or deleted will only take effect during the current instance that the API is being ran (data does not persist). The primary endpoint is the users endpoint and anything implemented in this specific endpoint is expected to be available for all users with an account. The chats and messages endpoints are not meant for all users to access (mainly administrators). For the scope of this project, some methods are implemented and enabled. Below are tables explaining the HTTP Responses, classes in this project, and a code snippet with comments for static data.
 
+## Postman Request Collections
+
+Access the collection of the Postman requests created to test the API by clicking [here](https://.postman.co/workspace/My-Workspace~82b786fb-d86e-43c5-800d-407283552b64/collection/23708110-4c85b204-a5c3-40b0-acf7-fd3bbb62f399?action=share&creator=23708110).
+
 ## Base URL
 
 The base url for the api is `localhost:3000/api/v1`
@@ -20,6 +24,14 @@ The base url for the api is `localhost:3000/api/v1`
     <tr>
         <td>201 - Created</td>
         <td>Succesfully created new entry.</td>
+    </tr>
+    <tr>
+        <td>204 - No Content</td>
+        <td>
+            Succesfully deleted entry. For chats, chats are only
+            deleted when no users are in a server. Otherwise,
+            this counts as the user leaving the server.
+        </td>
     </tr>
     <tr>
         <td>400 - Bad Request</td>
@@ -191,66 +203,66 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         <th><h3>Description</h3></th>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users</td>
         <td>Retrieves all users.</td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users?userId={id}</td>
         <td>
             Retrieves a particular user with that id using a query.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id</td>
         <td>Retrieves a particular user with that id.</td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats</td>
         <td>
             Retrieves all chats that the user with that id is in.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats/:chatId</td>
         <td>
             Retrieves information on the specific chat if the user is in it.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats/:chatId/messages</td>
         <td>
             Retrieves all messages of a particular chat that the user is in.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats/:chatId/messages?limit={num}</td>
         <td>
             Retrieves the {num} most recent messages of the chat.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats/:chatId/messages?userId={id}</td>
         <td>
             Retrieves all messages belonging to the userId of {id} if the user requesting the messages and the requested user are both in that chat.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/chats/:chatId/messages/:messageId</td>
         <td>
             Retrieves a particular message from a particular chat if the user requesting the message is in the chat.
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/users/:id/messages</td>
         <td>
             Retrieves all messages that the user with userId of id sent.
@@ -330,17 +342,17 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         <th><h3>Description</h3></th>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/chats</td>
         <td>Retrieves all chats.</td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/chats/:id</td>
         <td>Retrieves a particular chat with that id.</td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/chats/:id/users</td>
         <td>
             Retrieves all users that are in a particular chat
@@ -348,7 +360,7 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/chats/:id/messages</td>
         <td>
             Retrieves all messages that are in a particular chat
@@ -366,12 +378,12 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         <th><h3>Description</h3></th>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/messages</td>
         <td>Retrieves all messages.</td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>
             <span class="endpoint"
                 >/messages?messageId={id}</span
@@ -384,7 +396,7 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>
             /messages?userId={id}<br/>
             /messages?chatId={id}<br/>
@@ -398,7 +410,7 @@ const messages = [message1, message2, message3, message4, message5, message6];</
         </td>
     </tr>
     <tr>
-        <td>/GET</td>
+        <td>GET</td>
         <td>/messages/:id</td>
         <td>Retrieves a particular message with that id.</td>
     </tr>

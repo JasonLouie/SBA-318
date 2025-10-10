@@ -1,20 +1,73 @@
 import { signUp } from "./requests.js";
 const form = document.getElementById("signup-form");
 const signUpBtn = document.getElementById("signup-btn");
+const formTypeBtn = document.getElementById("form-type-btn");
 const status = document.getElementById("status");
 const formAlert = document.getElementById("form-alert");
 const usernameField = document.getElementById("username");
 const emailField = document.getElementById("email");
 const passwordField = document.getElementById("password");
-const confirmPasswordField = document.getElementById("confirmPassword");
+const formResponse = document.getElementById("form-response");
 const signupResponse = document.getElementById("signup-response");
 
-usernameField.addEventListener("input", validateUsername);
-emailField.addEventListener("input", validateEmail)
-passwordField.addEventListener("input", validatePassword);
+formTypeBtn.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+        e.target.classList.toggle("on");
+        e.target.parentElement.classList.toggle("on");
+        if (e.target.classList.contains("on")) {
+            useCustomValidation();
+        } else {
+            removeCustomValidation();
+        }
+    }
+});
 
-form.addEventListener("submit", async (e) => {
+function useCustomValidation() {
+    createConfirmPassword();
+    usernameField.addEventListener("input", validateUsername);
+    emailField.addEventListener("input", validateEmail)
+    passwordField.addEventListener("input", validatePassword);
+    form.addEventListener("submit", formValidate);
+
+    // Do not use the url-encoded format
+    form.removeAttribute("method");
+    form.removeAttribute("action");
+
+    formResponse.classList.remove("hidden");
+
+    function createConfirmPassword() {
+        form.appendChild(Object.assign(document.createElement("input"), {type: "password", id: "confirmPassword", name: "confirmPassword", placeholder: "Confirm password", autocomplete: "off"}));
+    }
+}
+
+function removeCustomValidation() {
+    // Remove confirm password
+    removeConfirmPassword();
+
+    // Remove field validation
+    usernameField.removeEventListener("input", validateUsername);
+    emailField.removeEventListener("input", validateEmail)
+    passwordField.removeEventListener("input", validatePassword);
+
+    form.removeEventListener("submit", formValidate);
+
+    // Use the url-encoded format
+    form.method = "POST";
+    form.action = "/api/v1/users";
+
+    formResponse.classList.add("hidden");
+
+    function removeConfirmPassword() {
+        const confirmPassword = form.elements["confirmPassword"];
+        if (confirmPassword) {
+            confirmPassword.remove();
+        }
+    }
+}
+
+async function formValidate(e) {
     e.preventDefault();
+    const confirmPasswordField = form.elements["confirmPassword"];
     signUpBtn.disabled = true;
     validateUsername({ target: usernameField });
     validateEmail({ target: emailField });
@@ -29,7 +82,7 @@ form.addEventListener("submit", async (e) => {
             });
             form.reset();
             alert("Sign up successful!");
-            showSignUpResponse(response);
+            updateSignUpResponse(response);
         } catch (error) {
             if (error.status === 409) {
                 const conflictType = error.response.data.error.split(" ")[0];
@@ -40,11 +93,13 @@ form.addEventListener("submit", async (e) => {
                 }
                 form.reportValidity();
             }
-            showSignUpResponse(error);
+            updateSignUpResponse(error);
         } finally {
-            formAlert.textContent = "Request sent to the server.";
+            formAlert.appendChild(Object.assign(document.createElement("p"), { textContent: "Request sent to the server." }));
             setTimeout(() => {
-                formAlert.textContent = "";
+                if (formAlert.firstElementChild) {
+                    formAlert.removeChild(formAlert.firstElementChild);
+                }
             }, 3000);
         }
     } else {
@@ -63,7 +118,7 @@ form.addEventListener("submit", async (e) => {
         }
     }
     signUpBtn.disabled = false;
-});
+}
 
 function validateUsername(e) {
     const username = e.target;
@@ -105,10 +160,10 @@ function validatePassword(e) {
     }
 }
 
-function showSignUpResponse(response) {
+function updateSignUpResponse(response) {
     clearResponse();
     const frag = new DocumentFragment();
-    const div = frag.appendChild(Object.assign(document.createElement("div"), {id: "response"}))
+    const div = frag.appendChild(Object.assign(document.createElement("div"), { id: "response" }))
     const pre = div.appendChild(document.createElement("pre"));
     if (response.status === 201) {
         status.textContent = `Status Code: ${response.status}`;

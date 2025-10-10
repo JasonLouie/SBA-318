@@ -9,8 +9,16 @@ body {
     margin: 0;
 }
 
+.desc {
+    margin-bottom: 10px;
+}
+
 .cursor-loading {
     cursor: progress;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .dark-mode {
@@ -65,7 +73,7 @@ section > h2 {
     margin-top: 15px;
 }
 
-.form-container {
+.sample-container {
     display: flex;
 }
 
@@ -128,6 +136,48 @@ form > h1 {
     position: absolute;
     text-align: center;
     width: 100%;
+}
+
+#form-container {
+    position: relative;
+}
+
+#form-toggle {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 10;
+}
+
+.option {
+    width: 50px;
+    height: 25px;
+    position: relative;
+    border-radius: 6px;
+    background-color: rgb(71, 9, 0);
+    transition: background-color 0.2s ease-in-out;
+    border: 1px solid black;
+}
+
+.option-btn {
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+    padding: 0;
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+div.on {
+    background-color: rgb(9, 71, 53);
+}
+
+button.on {
+    transform: translateX(25px);
 }
 
 #form-alert {
