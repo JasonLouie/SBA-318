@@ -5,9 +5,6 @@ import { chatExists, userExists, verifyKeys } from "../functions/functions.js";
 
 const router = express.Router();
 
-// NEED TO perform tests FOR STRICT messageId or the other 3
-// Gets all messages, a filtered array of messages, or a particular message
-// Queries allowed: At least one of the 3 (userId, chatId, limit) or strictly messageId
 router.get("/", (req, res) => {
     if (Object.keys(req.query).length === 1 && verifyKeys(req.query, ["messageId"])) {
         const messageId = req.query["messageId"];
