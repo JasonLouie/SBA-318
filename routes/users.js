@@ -43,7 +43,7 @@ router.route("/")
             users.push(user);
             res.status(201).json(users[users.length - 1]);
         } else {
-            throw new EndpointError(400, "Insufficient Data");
+            throw new EndpointError(400, "Insufficient or Extra Data Provided");
         }
     });
 
@@ -110,7 +110,7 @@ router.route("/:id/chats")
             chats.push(chat);
             res.status(201).json(chats[chats.length - 1]);
         } else {
-            throw new EndpointError(400, "Insufficient Data");
+            throw new EndpointError(400, "Insufficient or Extra Data Provided");
         }
     });
 
@@ -129,7 +129,7 @@ router.route("/:id/chats/:chatId")
                 if (c.id == req.params.chatId) {
                     if (req.body.users && req.body.users instanceof Array) { // Handle inviting users
                         addNonChatUsersByIds(req.body.users, chats[i]);
-                    } else {
+                    } else if (req.body.users) {
                         throw new EndpointError(400, "Invalid usage of inviting users");
                     }
                     for (const key in req.body) {
@@ -140,10 +140,13 @@ router.route("/:id/chats/:chatId")
                     return true;
                 }
             });
+            if (!chat) {
+                throw new EndpointError(404, "Chat does not exist");
+            }
             res.json(chat);
         } else {
             console.log(verifyKeys(req.body, ["users", "image_url", "name"]), req.body);
-            throw new EndpointError(400, "Insufficient Data");
+            throw new EndpointError(400, "Insufficient or Extra Data Provided");
         }
     })
     .delete((req, res) => { // Handle leaving the chat or deleting it (deletes if the last user leaves the chat)
@@ -180,12 +183,12 @@ router.get("/:id/chats/:chatId/users", (req, res) => {
     }
 });
 
-// Get the messages of a chat that the user is in
+// Route for messages from a particular chat that the user is in
 router.route("/:id/chats/:chatId/messages")
-    .get((req, res) => {
+    .get((req, res) => { // Get the messages of a chat that the user is in
         if (findUserChat(req.params.id, req.params.chatId)) {
             let chatMessages = findChatMessages(req.params.chatId);
-            if (req.query && Object.keys(req.query).length > 0) {
+            if (Object.keys(req.query).length > 0) {
                 if (!verifyKeys(req.query, ["userId", "limit"])) {
                     throw new EndpointError(403, "Query must be 'userId' or 'limit'.");
                 }
@@ -209,9 +212,9 @@ router.route("/:id/chats/:chatId/messages")
             throw new EndpointError(404, "User is not part of the chat group");
         }
     })
-    .post((req, res) => {
+    .post((req, res) => { // Create new message in a chat
         if(findUserChat(req.params.id, req.params.chatId)){
-            if (req.body.message) {
+            if (req.body && verifyKeys(req.body, ["message"])) {
                 const message = new Message(req.params.id, req.params.chatId, req.body.message, messages.length + 1);
                 messages.push(message);
                 res.status(201).json(messages[messages.length-1]);
@@ -237,10 +240,10 @@ router.route("/:id/chats/:chatId/messages/:messageId")
         }
     })
     .patch((req, res) => {
-        if (req.body && Object.keys(req.body).length === 1 && req.body["message"]) {
+        if (req.body && verifyKeys(req.body, ["message"])) {
             if (findUserChat(req.params.id, req.params.chatId)) {
                 const message = messages.find((m, i) => {
-                    if (m.userId == req.params.id && m.chatId == req.params.chatId && m.id == req.params.messageId) {
+                    if (m.senderId == req.params.id && m.chatId == req.params.chatId && m.id == req.params.messageId) {
                         messages[i]["message"] = req.body["message"];
                         return true;
                     }
@@ -252,7 +255,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
             } else {
                 throw new EndpointError(404, "User is not part of the chat group");
             }
-        } else if (!req.body) {
+        } else if (!req.body || Object.keys(req.body).length === 0) {
             throw new EndpointError(400, "Must contain a body with 'message'!");
         } else {
             throw new EndpointError(403, "Cannot modify anything other than the contents of the message");

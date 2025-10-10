@@ -101,6 +101,9 @@ export function findUserChatMessages(userId, chatId) {
  * @returns {Message[]}
  */
 export function findChatMessages(chatId) {
+    if (!chatExists(chatId)){
+        throw new EndpointError(404, "Chat does not exist");
+    }
     return messages.filter(m => m.chatId == chatId);
 }
 
@@ -125,16 +128,13 @@ export function findChatMessage(chatId, messageId) {
  * @returns {User[]} Array of Chat instances that the user is in
  */
 export function findChatUsers(chatId) {
-    if (!chatExists(chatId)) {
-        throw new EndpointError(404, "User does not exist");
+    const chat = chats.find(c => c.id == chatId);
+    if (!chat) {
+        throw new EndpointError(404, "Chat does not exist");
     }
-    const chatUsers = [];
-    for (const chat in chats) {
-        if (chat.chatId == chatId){
-            chatUsers.push(chat.userId);
-        }
-    }
-    return users.filter(u => chatUsers.includes(u.id) && u.email != null);
+    console.log(chat.users);
+    
+    return users.filter(u => chat.users.includes(u.id) && u.email != null);
 }
 
 /**
@@ -167,7 +167,7 @@ export function verifyKeys(obj, allowedKeys) {
             return false;
         }
     }
-    return true;
+    return Object.keys(obj).length > 0;
 }
 
 /**

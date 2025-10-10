@@ -42,8 +42,9 @@ router.get("/", (req, res) => {
             queriedMessages = queriedMessages.slice(Number(limit) * -1);
         }
         res.json(queriedMessages);
-    } else if (req.query) {
-        throw new EndpointError(403, "Query must contain 'userId', 'chatId', and/or 'limit', or only 'messageId'.");
+    } else if (Object.keys(req.query).length > 0) {
+        console.log(req.query);
+        throw new EndpointError(400, "Query must contain 'userId', 'chatId', and/or 'limit', or only 'messageId'.");
     } else {
         res.json(messages);
     }

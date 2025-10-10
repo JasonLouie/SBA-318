@@ -10,7 +10,7 @@ export default class Chat {
     #timestamp;
 
     constructor(image_url, users = [], id, name) {
-        this.#image_url = image_url || "../images/profile-dark.png";
+        this.#image_url = image_url || "../images/default-chat-icon.png";
         this.#id = id || generateRandomId();
         users.forEach(u => this.#users.push(u.id));
         this.name = name || users.join(", ");
@@ -26,7 +26,7 @@ export default class Chat {
     }
 
     get users() {
-        return {...this.#users};
+        return [...this.#users];
     }
 
     get preview() {
@@ -42,8 +42,8 @@ export default class Chat {
         return this.#timestamp.toLocaleTimeString("en-US", timeOptions);
     }
 
-    addUser(user) {
-        this.#users.push(user);
+    addUser(userId) {
+        this.#users.push(userId);
     }
 
     removeUser(userId) {
