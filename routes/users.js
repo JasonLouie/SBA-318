@@ -2,7 +2,7 @@ import express from "express";
 import { chats, messages, users } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
-import { findChatMessages, findUserChat, findChatMessage, findUserChatMessages, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, removeChatMessages, findChatUsers } from "../functions/functions.js";
+import { findChatMessages, findUserChat, findChatMessage, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, messageExists, removeChatMessages, findChatUsers } from "../functions/functions.js";
 import Chat from "../classes/Chat.js";
 import Message from "../classes/Message.js";
 
@@ -16,7 +16,7 @@ router.route("/")
             }
             const userId = req.query["userId"];
             if (userId) {
-                const user = users.find(u => u.id == userId);
+                const user = users.find(u => u.id == userId && u.email != null);
                 if (user) {
                     res.json(user);
                 } else {
@@ -264,7 +264,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
                 throw new EndpointError(404, "Message does not exist");
             }
             const message = messages.find((m, i) => {
-                if (m.userId == req.params.id && m.chatId == req.params.chatId && m.id == req.params.messageId) {
+                if (m.senderId == req.params.id && m.chatId == req.params.chatId && m.id == req.params.messageId) {
                     messages.splice(i, 1);
                     return true;
                 }

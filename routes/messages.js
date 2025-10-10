@@ -49,43 +49,12 @@ router.get("/", (req, res) => {
     }
 });
 
-router.route("/:id")
-    .get((req, res) => {
-        const message = messages.find(m => m.id == req.params.id);
-        if (!message) {
-            throw new EndpointError(404, "Message does not exist");
-        }
-        res.json(message);
-    })
-    .patch((req, res) => { // Only allow modifying the message
-        if (req.body && Object.keys(req.body).length === 1 && req.body["message"]) {
-            const message = messages.find((m, i) => {
-                if (m.id == req.params.id) {
-                    messages[i]["message"] = req.body["message"];
-                    return true;
-                }
-            });
-            if (!message) {
-                throw new EndpointError(404, "Message does not exist");
-            }
-            res.json(message);
-        } else if (!req.body) {
-            throw new EndpointError(400, "Must contain a body with 'message'!");
-        } else {
-            throw new EndpointError(403, "Cannot modify anything other than the contents of the message");
-        }
-    })
-    .delete((req, res) => {
-        const message = messages.find((m, i) => {
-            if (m.id == req.params.id) {
-                messages.splice(i, 1);
-                return true;
-            }
-        });
-        if (!message) {
-            throw new EndpointError(404, "Message does not exist");
-        }
-        res.json(message);
-    });
+router.get("/:id", (req, res) => {
+    const message = messages.find(m => m.id == req.params.id);
+    if (!message) {
+        throw new EndpointError(404, "Message does not exist");
+    }
+    res.json(message);
+});
 
 export default router;

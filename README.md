@@ -322,3 +322,84 @@ const messages = [message1, message2, message3, message4, message5, message6];</
 </table>
 
 ## Chats Endpoint
+
+<table>
+    <tr>
+        <th><h3>Method</h3></th>
+        <th><h3>Endpoint</h3></th>
+        <th><h3>Description</h3></th>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/chats</td>
+        <td>Retrieves all chats.</td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/chats/:id</td>
+        <td>Retrieves a particular chat with that id.</td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/chats/:id/users</td>
+        <td>
+            Retrieves all users that are in a particular chat
+            with that id.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/chats/:id/messages</td>
+        <td>
+            Retrieves all messages that are in a particular chat
+            with that id.
+        </td>
+    </tr>
+</table>
+
+## Messages Endpoint
+
+<table>
+    <tr>
+        <th><h3>Method</h3></th>
+        <th><h3>Endpoint</h3></th>
+        <th><h3>Description</h3></th>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/messages</td>
+        <td>Retrieves all messages.</td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>
+            <span class="endpoint"
+                >/messages?messageId={id}</span
+            >
+        </td>
+        <td>
+            Retrieves a particular message with that id using a
+            query. Not compatible with the other string queries
+            in the next row.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>
+            /messages?userId={id}<br/>
+            /messages?chatId={id}<br/>
+            /messages?limit={num}<br/>
+        </td>
+        <td>
+            Retrieves messages filtered by the string queries
+            userId, chatId, and limit. They can be used
+            interchangeably. The limit retrieves the {num} most
+            recent messages.
+        </td>
+    </tr>
+    <tr>
+        <td>/GET</td>
+        <td>/messages/:id</td>
+        <td>Retrieves a particular message with that id.</td>
+    </tr>
+</table>
