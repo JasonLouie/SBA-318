@@ -152,7 +152,7 @@ export function findUserChatMessage(userId, chatId, messageId) {
     } else if (!messageExists(messageId)) {
         throw new EndpointError(404, "Message does not exist");
     }
-    return messages.find(m => m.userId == userId && m.chatId == chatId && m.id == messageId);
+    return messages.find(m => m.senderId == userId && m.chatId == chatId && m.id == messageId);
 }
 
 /**
@@ -197,6 +197,7 @@ export function addNonChatUsersByIds(ids, chat){
     if (!chat) {
         throw new EndpointError(404, "Chat does not exist");
     }
+    const tempChatUsers = [];
     for(const id of ids){
         const user = users.find(u => u.id == id && u.email != null);
         if(!user) {
@@ -204,8 +205,10 @@ export function addNonChatUsersByIds(ids, chat){
         } else if (chat.hasUser(id)){
             throw new EndpointError(409, "User is already in the chat");
         }
-        chat.addUser(id);
+        tempChatUsers.push(id);
     }
+    // Only add users to the chat after verifying that the users exist and aren't already in the chat
+    chat.addUsers(tempChatUsers);
 }
 
 /**

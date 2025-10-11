@@ -2,7 +2,7 @@ import express from "express";
 import { chats, messages, users } from "../data/data.js";
 import EndpointError from "../classes/EndpointError.js";
 import User from "../classes/User.js";
-import { findChatMessages, findUserChat, findChatMessage, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, messageExists, removeChatMessages, findChatUsers } from "../functions/functions.js";
+import { findChatMessages, findUserChat, findChatMessage, findUserChats, findUserMessages, userExists, verifyKeys, findUsersByIds, addNonChatUsersByIds, chatExists, messageExists, removeChatMessages, findChatUsers, findUserChatMessage } from "../functions/functions.js";
 import Chat from "../classes/Chat.js";
 import Message from "../classes/Message.js";
 
@@ -96,7 +96,9 @@ router.route("/:id/chats")
         res.json(userChats);
     })
     .post((req, res) => { // Creates a new chat
-        if (req.body && req.body.users instanceof Array && verifyKeys(req.body, ["users", "image_url", "name"])) {
+        if (!userExists(req.params.id)) {
+            throw new EndpointError(404, "User does not exist");
+        } else if (req.body && req.body.users instanceof Array && verifyKeys(req.body, ["users", "image_url", "name"])) {
             if (!req.body.users.includes(Number(req.params.id))) {
                 req.body.users.push(req.params.id);
             }
@@ -126,9 +128,9 @@ router.route("/:id/chats/:chatId")
     .patch((req, res) => { // Handle inviting users to the chat and changing the name and/or photo
         if (req.body && verifyKeys(req.body, ["users", "image_url", "name"])) {
             const chat = chats.find((c, i) => {
-                if (c.id == req.params.chatId) {
-                    if (req.body.users && req.body.users instanceof Array) { // Handle inviting users
-                        addNonChatUsersByIds(req.body.users, chats[i]);
+                if (c.id == req.params.chatId && c.hasUser(req.params.id)) {
+                    if (req.body.users && req.body.users instanceof Array && req.body.users.length > 0) { // Handle inviting users
+                        addNonChatUsersByIds(req.body.users, chats[i]); // Throws 409 if an id in users is already in the chat
                     } else if (req.body.users) {
                         throw new EndpointError(400, "Invalid usage of inviting users");
                     }
@@ -138,6 +140,8 @@ router.route("/:id/chats/:chatId")
                         }
                     }
                     return true;
+                } else if (!c.hasUser(req.params.id)) {
+                    throw new EndpointError(404, "User is not part of the chat group");
                 }
             });
             if (!chat) {
@@ -157,10 +161,7 @@ router.route("/:id/chats/:chatId")
         }
         const userChat = chats.find((c, i) => {
             if (c.hasUser(req.params.id) && c.id == req.params.chatId) {
-                const removed = chats[i].removeUser(req.params.id);
-                if (!removed) {
-                    throw new EndpointError(500, "Unexpected error occurred when leaving the chat")
-                }
+                chats[i].removeUser(req.params.id);
                 if (chats[i].numUsers === 0) { // Delete the chat if no users remain
                     removeChatMessages(req.params.chatId); // Cascade delete the messages of the chat
                     chats.splice(i, 1);
@@ -190,7 +191,7 @@ router.route("/:id/chats/:chatId/messages")
             let chatMessages = findChatMessages(req.params.chatId);
             if (Object.keys(req.query).length > 0) {
                 if (!verifyKeys(req.query, ["userId", "limit"])) {
-                    throw new EndpointError(403, "Query must be 'userId' or 'limit'.");
+                    throw new EndpointError(400, "Query must be 'userId' or 'limit'.");
                 }
                 const userId = req.query["userId"];
                 const limit = req.query["limit"];
@@ -230,7 +231,7 @@ router.route("/:id/chats/:chatId/messages")
 router.route("/:id/chats/:chatId/messages/:messageId")
     .get((req, res) => {
         if (findUserChat(req.params.id, req.params.chatId)) {
-            const message = findChatMessage(req.params.chatId, req.params.messageId);
+            const message = findUserChatMessage(req.params.id, req.params.chatId, req.params.messageId);
             if (!message) {
                 throw new EndpointError(404, "Message does not exist");
             }
@@ -263,9 +264,6 @@ router.route("/:id/chats/:chatId/messages/:messageId")
     })
     .delete((req, res) => {
         if (findUserChat(req.params.id, req.params.chatId)) {
-            if (!messageExists(req.params.messageId)) {
-                throw new EndpointError(404, "Message does not exist");
-            }
             const message = messages.find((m, i) => {
                 if (m.senderId == req.params.id && m.chatId == req.params.chatId && m.id == req.params.messageId) {
                     messages.splice(i, 1);
@@ -275,7 +273,7 @@ router.route("/:id/chats/:chatId/messages/:messageId")
             if (message) {
                 res.status(204).json(message);
             } else {
-                throw new EndpointError(403, "Cannot delete a message that does not belong to user");
+                throw new EndpointError(404, "Message does not exist");
             }
         } else {
             throw new EndpointError(404, "User is not part of the chat group");

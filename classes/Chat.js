@@ -46,6 +46,10 @@ export default class Chat {
         this.#users.push(userId);
     }
 
+    addUsers(userIdArr) {
+        this.#users = this.#users.concat(userIdArr);
+    }
+
     removeUser(userId) {
         let removed = false;
         this.#users.find((u, i) => {
