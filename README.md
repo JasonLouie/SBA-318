@@ -4,7 +4,7 @@ This is an express server application. It is an WebChatAPI created to handle tex
 
 ## Postman Request Collections
 
-Access the collection of the Postman requests created to test the API by clicking [here](https://.postman.co/workspace/My-Workspace~82b786fb-d86e-43c5-800d-407283552b64/collection/23708110-4c85b204-a5c3-40b0-acf7-fd3bbb62f399?action=share&creator=23708110).If the link does not work, try it again with the `https://` prefix included.
+Access the collection of the Postman requests created to test the API by clicking [here](https://.postman.co/workspace/My-Workspace~82b786fb-d86e-43c5-800d-407283552b64/collection/23708110-4c85b204-a5c3-40b0-acf7-fd3bbb62f399?action=share&creator=23708110). If the link does not work, try it again with the `https://` prefix included.
 
 ## Base URL
 
